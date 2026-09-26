@@ -1,0 +1,231 @@
+% =====================================================================
+%  BASE DE CONOCIMIENTO - Sistema Metro de Medellín (SITVA, simplificado)
+% ---------------------------------------------------------------------
+%  Sintaxis tipo Prolog/Datalog:
+%    hecho(arg1, arg2).
+%    cabeza(X, Y) :- cuerpo1(X, Z), cuerpo2(Z, Y), not otro(X), X != Y.
+%  - Constantes: en minúscula (san_antonio) o entre comillas ("San Antonio").
+%  - Variables: empiezan con mayúscula o con _ .
+%  - Comentarios: empiezan con % .
+%
+%  Incluye: Líneas A y B (metro), metrocables K, J, L, H, M y P,
+%  Tranvía de Ayacucho (T-A) y Metroplús Línea 1.
+%  NOTA: modelo académico SIMPLIFICADO. Las estaciones y conexiones son
+%  reales, pero los tiempos (minutos) y coordenadas son aproximados.
+%  Se pueden ajustar editando este archivo sin tocar el código Python.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% 1. LÍNEAS
+% ---------------------------------------------------------------------
+linea(linea_a,     "Línea A - Metro (Niquía - La Estrella)").
+linea(linea_b,     "Línea B - Metro (San Antonio - San Javier)").
+linea(linea_k,     "Línea K - Metrocable (Acevedo - Santo Domingo)").
+linea(linea_l,     "Línea L - Metrocable Arví").
+linea(linea_j,     "Línea J - Metrocable (San Javier - La Aurora)").
+linea(linea_p,     "Línea P - Metrocable (Acevedo - El Progreso)").
+linea(linea_h,     "Línea H - Metrocable (Oriente - Villa Sierra)").
+linea(linea_m,     "Línea M - Metrocable (Miraflores - Trece de Noviembre)").
+linea(tranvia_t,   "Línea T-A - Tranvía de Ayacucho").
+linea(metroplus_1, "Línea 1 - Metroplús").
+
+% ---------------------------------------------------------------------
+% 2. ESTACIONES: nombre(id, "Nombre visible") y ubicacion(id, lat, lon)
+% ---------------------------------------------------------------------
+% --- Línea A
+nombre(niquia, "Niquía").                       ubicacion(niquia, 6.3375, -75.5440).
+nombre(bello, "Bello").                         ubicacion(bello, 6.3300, -75.5535).
+nombre(madera, "Madera").                       ubicacion(madera, 6.3155, -75.5555).
+nombre(acevedo, "Acevedo").                     ubicacion(acevedo, 6.3000, -75.5580).
+nombre(tricentenario, "Tricentenario").         ubicacion(tricentenario, 6.2905, -75.5645).
+nombre(caribe, "Caribe").                       ubicacion(caribe, 6.2775, -75.5695).
+nombre(universidad, "Universidad").             ubicacion(universidad, 6.2695, -75.5655).
+nombre(hospital, "Hospital").                   ubicacion(hospital, 6.2635, -75.5630).
+nombre(prado, "Prado").                         ubicacion(prado, 6.2570, -75.5665).
+nombre(parque_berrio, "Parque Berrío").         ubicacion(parque_berrio, 6.2500, -75.5685).
+nombre(san_antonio, "San Antonio").             ubicacion(san_antonio, 6.2470, -75.5700).
+nombre(alpujarra, "Alpujarra").                 ubicacion(alpujarra, 6.2425, -75.5720).
+nombre(exposiciones, "Exposiciones").           ubicacion(exposiciones, 6.2385, -75.5740).
+nombre(industriales, "Industriales").           ubicacion(industriales, 6.2290, -75.5760).
+nombre(poblado, "Poblado").                     ubicacion(poblado, 6.2125, -75.5780).
+nombre(aguacatala, "Aguacatala").               ubicacion(aguacatala, 6.1935, -75.5830).
+nombre(ayura, "Ayurá").                         ubicacion(ayura, 6.1860, -75.5855).
+nombre(envigado, "Envigado").                   ubicacion(envigado, 6.1750, -75.5920).
+nombre(itagui, "Itagüí").                       ubicacion(itagui, 6.1635, -75.6030).
+nombre(sabaneta, "Sabaneta").                   ubicacion(sabaneta, 6.1580, -75.6175).
+nombre(la_estrella, "La Estrella").             ubicacion(la_estrella, 6.1525, -75.6265).
+
+% --- Línea B
+nombre(cisneros, "Cisneros").                   ubicacion(cisneros, 6.2445, -75.5760).
+nombre(suramericana, "Suramericana").           ubicacion(suramericana, 6.2530, -75.5825).
+nombre(estadio, "Estadio").                     ubicacion(estadio, 6.2530, -75.5880).
+nombre(floresta, "Floresta").                   ubicacion(floresta, 6.2585, -75.5975).
+nombre(santa_lucia, "Santa Lucía").             ubicacion(santa_lucia, 6.2590, -75.6040).
+nombre(san_javier, "San Javier").               ubicacion(san_javier, 6.2560, -75.6130).
+
+% --- Metrocables
+nombre(andalucia, "Andalucía").                 ubicacion(andalucia, 6.2945, -75.5530).
+nombre(popular, "Popular").                     ubicacion(popular, 6.2960, -75.5480).
+nombre(santo_domingo, "Santo Domingo Savio").   ubicacion(santo_domingo, 6.2935, -75.5415).
+nombre(arvi, "Arví").                           ubicacion(arvi, 6.2785, -75.4995).
+nombre(juan_xxiii, "Juan XXIII").               ubicacion(juan_xxiii, 6.2605, -75.6190).
+nombre(vallejuelos, "Vallejuelos").             ubicacion(vallejuelos, 6.2690, -75.6250).
+nombre(la_aurora, "La Aurora").                 ubicacion(la_aurora, 6.2785, -75.6310).
+nombre(sena, "SENA").                           ubicacion(sena, 6.2990, -75.5680).
+nombre(doce_de_octubre, "Doce de Octubre").     ubicacion(doce_de_octubre, 6.2975, -75.5770).
+nombre(el_progreso, "El Progreso").             ubicacion(el_progreso, 6.2960, -75.5850).
+nombre(las_torres, "Las Torres").               ubicacion(las_torres, 6.2415, -75.5345).
+nombre(villa_sierra, "Villa Sierra").           ubicacion(villa_sierra, 6.2440, -75.5305).
+nombre(el_pinal, "El Pinal").                   ubicacion(el_pinal, 6.2355, -75.5445).
+nombre(trece_de_noviembre, "Trece de Noviembre"). ubicacion(trece_de_noviembre, 6.2335, -75.5390).
+
+% --- Tranvía de Ayacucho (T-A)
+nombre(san_jose, "San José").                   ubicacion(san_jose, 6.2455, -75.5655).
+nombre(pabellon_del_agua, "Pabellón del Agua EPM"). ubicacion(pabellon_del_agua, 6.2445, -75.5620).
+nombre(bicentenario, "Bicentenario").           ubicacion(bicentenario, 6.2435, -75.5585).
+nombre(buenos_aires, "Buenos Aires").           ubicacion(buenos_aires, 6.2410, -75.5545).
+nombre(miraflores, "Miraflores").               ubicacion(miraflores, 6.2400, -75.5505).
+nombre(loyola, "Loyola").                       ubicacion(loyola, 6.2390, -75.5465).
+nombre(alejandro_echavarria, "Alejandro Echavarría"). ubicacion(alejandro_echavarria, 6.2385, -75.5425).
+nombre(oriente, "Oriente").                     ubicacion(oriente, 6.2380, -75.5390).
+
+% --- Metroplús Línea 1
+nombre(u_de_medellin, "Universidad de Medellín"). ubicacion(u_de_medellin, 6.2315, -75.6100).
+nombre(los_alpes, "Los Alpes").                 ubicacion(los_alpes, 6.2300, -75.6045).
+nombre(la_palma, "La Palma").                   ubicacion(la_palma, 6.2290, -75.5995).
+nombre(parque_belen, "Parque de Belén").        ubicacion(parque_belen, 6.2305, -75.5950).
+nombre(rosales, "Rosales").                     ubicacion(rosales, 6.2315, -75.5905).
+nombre(fatima, "Fátima").                       ubicacion(fatima, 6.2320, -75.5860).
+nombre(nutibara, "Nutibara").                   ubicacion(nutibara, 6.2315, -75.5815).
+nombre(plaza_mayor, "Plaza Mayor").             ubicacion(plaza_mayor, 6.2400, -75.5770).
+nombre(minorista, "Minorista").                 ubicacion(minorista, 6.2530, -75.5730).
+nombre(chagualo, "Chagualo").                   ubicacion(chagualo, 6.2590, -75.5700).
+nombre(ruta_n, "Ruta N - U de A").              ubicacion(ruta_n, 6.2630, -75.5665).
+nombre(palos_verdes, "Palos Verdes").           ubicacion(palos_verdes, 6.2660, -75.5570).
+nombre(gardel, "Gardel").                       ubicacion(gardel, 6.2700, -75.5550).
+nombre(manrique, "Manrique").                   ubicacion(manrique, 6.2730, -75.5530).
+nombre(las_esmeraldas, "Las Esmeraldas").       ubicacion(las_esmeraldas, 6.2765, -75.5515).
+nombre(berlin, "Berlín").                       ubicacion(berlin, 6.2800, -75.5500).
+nombre(parque_aranjuez, "Parque de Aranjuez").  ubicacion(parque_aranjuez, 6.2830, -75.5520).
+
+% ---------------------------------------------------------------------
+% 3. TRAMOS: tramo(estacion_a, estacion_b, linea, minutos)
+%    Se declaran en un solo sentido; la regla de simetría los completa.
+% ---------------------------------------------------------------------
+% --- Línea A (norte -> sur)
+tramo(niquia, bello, linea_a, 2).
+tramo(bello, madera, linea_a, 3).
+tramo(madera, acevedo, linea_a, 2).
+tramo(acevedo, tricentenario, linea_a, 2).
+tramo(tricentenario, caribe, linea_a, 2).
+tramo(caribe, universidad, linea_a, 2).
+tramo(universidad, hospital, linea_a, 2).
+tramo(hospital, prado, linea_a, 2).
+tramo(prado, parque_berrio, linea_a, 2).
+tramo(parque_berrio, san_antonio, linea_a, 1).
+tramo(san_antonio, alpujarra, linea_a, 1).
+tramo(alpujarra, exposiciones, linea_a, 1).
+tramo(exposiciones, industriales, linea_a, 2).
+tramo(industriales, poblado, linea_a, 3).
+tramo(poblado, aguacatala, linea_a, 3).
+tramo(aguacatala, ayura, linea_a, 2).
+tramo(ayura, envigado, linea_a, 2).
+tramo(envigado, itagui, linea_a, 3).
+tramo(itagui, sabaneta, linea_a, 3).
+tramo(sabaneta, la_estrella, linea_a, 2).
+
+% --- Línea B (oriente -> occidente)
+tramo(san_antonio, cisneros, linea_b, 2).
+tramo(cisneros, suramericana, linea_b, 2).
+tramo(suramericana, estadio, linea_b, 2).
+tramo(estadio, floresta, linea_b, 2).
+tramo(floresta, santa_lucia, linea_b, 2).
+tramo(santa_lucia, san_javier, linea_b, 2).
+
+% --- Metrocables
+tramo(acevedo, andalucia, linea_k, 4).
+tramo(andalucia, popular, linea_k, 3).
+tramo(popular, santo_domingo, linea_k, 4).
+tramo(santo_domingo, arvi, linea_l, 14).
+tramo(san_javier, juan_xxiii, linea_j, 4).
+tramo(juan_xxiii, vallejuelos, linea_j, 4).
+tramo(vallejuelos, la_aurora, linea_j, 4).
+tramo(acevedo, sena, linea_p, 4).
+tramo(sena, doce_de_octubre, linea_p, 4).
+tramo(doce_de_octubre, el_progreso, linea_p, 4).
+tramo(oriente, las_torres, linea_h, 4).
+tramo(las_torres, villa_sierra, linea_h, 4).
+tramo(miraflores, el_pinal, linea_m, 4).
+tramo(el_pinal, trece_de_noviembre, linea_m, 4).
+
+% --- Tranvía de Ayacucho
+tramo(san_antonio, san_jose, tranvia_t, 3).
+tramo(san_jose, pabellon_del_agua, tranvia_t, 2).
+tramo(pabellon_del_agua, bicentenario, tranvia_t, 2).
+tramo(bicentenario, buenos_aires, tranvia_t, 3).
+tramo(buenos_aires, miraflores, tranvia_t, 3).
+tramo(miraflores, loyola, tranvia_t, 3).
+tramo(loyola, alejandro_echavarria, tranvia_t, 3).
+tramo(alejandro_echavarria, oriente, tranvia_t, 3).
+
+% --- Metroplús Línea 1 (occidente -> nororiente)
+tramo(u_de_medellin, los_alpes, metroplus_1, 3).
+tramo(los_alpes, la_palma, metroplus_1, 3).
+tramo(la_palma, parque_belen, metroplus_1, 3).
+tramo(parque_belen, rosales, metroplus_1, 3).
+tramo(rosales, fatima, metroplus_1, 3).
+tramo(fatima, nutibara, metroplus_1, 3).
+tramo(nutibara, industriales, metroplus_1, 3).
+tramo(industriales, plaza_mayor, metroplus_1, 4).
+tramo(plaza_mayor, cisneros, metroplus_1, 3).
+tramo(cisneros, minorista, metroplus_1, 4).
+tramo(minorista, chagualo, metroplus_1, 3).
+tramo(chagualo, ruta_n, metroplus_1, 3).
+tramo(ruta_n, hospital, metroplus_1, 2).
+tramo(hospital, palos_verdes, metroplus_1, 4).
+tramo(palos_verdes, gardel, metroplus_1, 3).
+tramo(gardel, manrique, metroplus_1, 3).
+tramo(manrique, las_esmeraldas, metroplus_1, 3).
+tramo(las_esmeraldas, berlin, metroplus_1, 3).
+tramo(berlin, parque_aranjuez, metroplus_1, 3).
+
+% ---------------------------------------------------------------------
+% 4. PARÁMETROS
+% ---------------------------------------------------------------------
+% Minutos adicionales por cada transbordo (caminar + esperar el siguiente vehículo).
+penalizacion_transbordo(5).
+
+% Estaciones fuera de servicio (se pueden agregar aquí o con --cerrar).
+% cerrada(san_antonio).
+
+% ---------------------------------------------------------------------
+% 5. REGLAS LÓGICAS (inferencia por encadenamiento hacia adelante)
+% ---------------------------------------------------------------------
+% R1. Toda estación que tiene nombre es una estación.
+estacion(X) :- nombre(X, _).
+
+% R2-R3. Los tramos son bidireccionales (simetría).
+conectado(X, Y, L, T) :- tramo(X, Y, L, T).
+conectado(X, Y, L, T) :- tramo(Y, X, L, T).
+
+% R4. Una línea sirve a una estación si pasa por ella.
+sirve(L, X) :- conectado(X, _, L, _).
+
+% R5. Una estación es de transbordo si la sirven dos líneas distintas.
+transbordo(X) :- sirve(L1, X), sirve(L2, X), L1 != L2.
+
+% R6. Una estación está disponible si existe y no está cerrada.
+disponible(X) :- estacion(X), not cerrada(X).
+
+% R7. Un movimiento es válido si ambos extremos están disponibles.
+movimiento(X, Y, L, T) :- conectado(X, Y, L, T), disponible(X), disponible(Y).
+
+% R8. Dos estaciones son vecinas si hay un movimiento válido entre ellas.
+vecina(X, Y) :- movimiento(X, Y, _, _).
+
+% R9-R10. Alcanzabilidad (cierre transitivo): de X se puede llegar a Y.
+alcanzable(X, Y) :- vecina(X, Y).
+alcanzable(X, Z) :- alcanzable(X, Y), vecina(Y, Z).
+
+% R11. Dos líneas se conectan si comparten una estación de transbordo.
+conecta_lineas(L1, L2) :- sirve(L1, X), sirve(L2, X), L1 != L2.

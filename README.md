@@ -20,7 +20,7 @@ Sistema basado en conocimiento que encuentra la **mejor ruta** entre dos estacio
 - [PDF de pruebas realizadas](docs/Pruebas_Sistema_Rutas.pdf): 10 casos funcionales y 27 pruebas unitarias.
 - [PDF de entrega](docs/Entrega_Actividad2.pdf): datos del equipo y enlace al repositorio.
 - [Estado de los requisitos](docs/estado_entrega.md).
-- **Video:** Santiago lo publicará en YouTube. El enlace se incorporará cuando esté disponible; el montaje final dura 8:04.
+- [Video explicativo en YouTube](https://www.youtube.com/watch?v=CBGlb2Fn-Ms): duración 8:04, con participación de ambos integrantes.
 
 ### Descargar y ejecutar
 
@@ -91,8 +91,7 @@ Ruta: La Estrella  ->  Arví   [A*]
 ```bash
 python -m unittest discover -s tests -v      # 27 pruebas unitarias
 python generar_pdfs.py
-# Cuando se disponga del enlace de YouTube:
-# python generar_pdfs.py --video "ENLACE_REAL_DE_YOUTUBE"
+# Los enlaces del repositorio y del video ya están configurados.
 ```
 
 `generar_pdfs.py` ejecuta el sistema de verdad y produce:
@@ -161,7 +160,7 @@ El PDF incluye las salidas reales y los detalles de las pruebas. La consulta `tr
 
 ## Historial y participación
 
-Se conservan los ocho commits originales de Geraldine Ríos correspondientes al desarrollo del sistema. La preparación de la entrega, la actualización del guion, los nombres, las instrucciones, los enlaces y los documentos de pruebas se registra en un commit posterior de Santiago Duque Mora. No se reescribieron autores ni fechas del historial recibido.
+Se conservan los ocho commits originales de Geraldine Ríos correspondientes al desarrollo del sistema. La preparación de la entrega, la actualización del guion, los nombres, las instrucciones, los enlaces y los documentos de pruebas se registra en commits posteriores de Santiago Duque Mora. No se reescribieron autores ni fechas del historial recibido.
 
 ```bash
 git log --format="%h %an - %s"
@@ -169,7 +168,6 @@ git log --format="%h %an - %s"
 
 ## Pendientes para cerrar la entrega del campus
 
-1. Incorporar el enlace de YouTube que aportará Santiago al README y al PDF de entrega.
-2. Agregar a Sandra Bautista como colaboradora cuando se conozca su usuario de GitHub. El repositorio público permite consultarlo, pero no sustituye ese requisito de la actividad.
+Agregar a Sandra Bautista como colaboradora cuando se conozca su usuario de GitHub. El repositorio público permite consultarlo, pero no sustituye ese requisito de la actividad.
 
 El envío del PDF al campus corresponde a la entrega académica y no se realiza desde este repositorio.

@@ -309,8 +309,8 @@ def documento_entrega(integrantes, repo, video):
                      "python -m unittest discover -s tests -v", CODE),
         Spacer(1, 10), Paragraph(
             "El repositorio es público e incluye el código y los documentos académicos. "
-            "Santiago publicará el video final de 8 minutos y 4 segundos en YouTube; su enlace se incorporará "
-            "cuando esté disponible. El historial original de Geraldine Ríos se conserva; "
+            "El video final de 8 minutos y 4 segundos está disponible en YouTube mediante el enlace de esta tabla. "
+            "El historial original de Geraldine Ríos se conserva; "
             "la preparación de documentación y entrega se registra por separado. "
             "La invitación formal a Sandra Bautista como colaboradora sigue pendiente: no se dispone de su "
             "usuario de GitHub. La visibilidad pública permite consultar los archivos por enlace, pero no "
@@ -325,7 +325,7 @@ def documento_entrega(integrantes, repo, video):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--repo", default="https://github.com/Dumo04/actividad2-rutas-metro-medellin")
-    p.add_argument("--video", default="Pendiente: Santiago publicará el video en YouTube y aportará el enlace")
+    p.add_argument("--video", default="https://www.youtube.com/watch?v=CBGlb2Fn-Ms")
     p.add_argument("--integrantes", nargs="+",
                    default=["Santiago Duque Mora", "Geraldine Ríos"])
     a = p.parse_args()

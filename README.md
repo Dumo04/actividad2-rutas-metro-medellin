@@ -1,6 +1,6 @@
 # Sistema inteligente de rutas – Metro de Medellín
 
-**Actividad 3 – Inteligencia Artificial · Corporación Universitaria Iberoamericana**
+**Actividad 2 - Búsqueda y sistemas basados en reglas · Corporación Universitaria Iberoamericana**
 
 Sistema basado en conocimiento que encuentra la **mejor ruta** entre dos estaciones del sistema de transporte masivo. Combina:
 
@@ -10,18 +10,32 @@ Sistema basado en conocimiento que encuentra la **mejor ruta** entre dos estacio
 
 > Modelo académico **simplificado**: las estaciones y conexiones son reales, pero los tiempos y coordenadas son aproximados. Todo se puede ajustar en el archivo `.kb` sin tocar el código.
 
-## Integrantes
+**Integrantes:** Santiago Duque Mora y Geraldine Ríos.
 
-| Nombre | Aporte principal |
-|---|---|
-| Geraldine Ríos | Motor de inferencia y búsqueda A* |
-| [Integrante 2] | Base de conocimiento (estaciones, tramos, reglas) |
-| [Integrante 3] | Pruebas unitarias y documento de pruebas |
-| [Integrante 4] | Interfaz de línea de comandos, mapa y video |
+**Docente:** Sandra Bautista.
+
+## Entrega académica
+
+- [Repositorio público](https://github.com/Dumo04/actividad2-rutas-metro-medellin)
+- [PDF de pruebas realizadas](docs/Pruebas_Sistema_Rutas.pdf): 10 casos funcionales y 27 pruebas unitarias.
+- [PDF de entrega](docs/Entrega_Actividad2.pdf): datos del equipo y enlace al repositorio.
+- [Estado de los requisitos](docs/estado_entrega.md).
+- **Video:** Santiago lo publicará en YouTube. El enlace se incorporará cuando esté disponible; el montaje final dura 8:04.
+
+### Descargar y ejecutar
+
+```bash
+git clone https://github.com/Dumo04/actividad2-rutas-metro-medellin.git
+cd actividad2-rutas-metro-medellin
+python main.py -o "La Estrella" -d "Arví" --comparar
+python -m unittest discover -s tests -v
+```
+
+También se puede usar **Code > Download ZIP**, extraerlo y abrir una terminal en la carpeta que contiene `main.py`.
 
 ## Requisitos
 
-- Python 3.8 o superior
+- Python 3.12 (versión utilizada para verificar la entrega)
 - El sistema **no necesita librerías externas**. Solo el mapa (`--mapa`) y la generación de PDFs usan `matplotlib` y `reportlab`:
 
 ```bash
@@ -76,12 +90,14 @@ Ruta: La Estrella  ->  Arví   [A*]
 
 ```bash
 python -m unittest discover -s tests -v      # 27 pruebas unitarias
-python generar_pdfs.py --repo URL --video URL --integrantes "Nombre 1" "Nombre 2" ...
+python generar_pdfs.py
+# Cuando se disponga del enlace de YouTube:
+# python generar_pdfs.py --video "ENLACE_REAL_DE_YOUTUBE"
 ```
 
 `generar_pdfs.py` ejecuta el sistema de verdad y produce:
 - `docs/Pruebas_Sistema_Rutas.pdf` – casos de prueba, salidas de consola, comparación de algoritmos y resultados de las pruebas unitarias.
-- `docs/Entrega_Actividad3.pdf` – documento con los enlaces del repositorio y del video.
+- `docs/Entrega_Actividad2.pdf` – documento con los enlaces del repositorio y del video.
 
 ## Estructura
 
@@ -124,18 +140,36 @@ El grafo de búsqueda se construye **solo** con los hechos `movimiento/4` que de
 
 - **Estado:** (estación, línea actual) → así se puede cobrar el transbordo.
 - **Costo g(n):** minutos de viaje + penalización por cada cambio de línea.
-- **Heurística h(n):** distancia en línea recta (haversine) al destino ÷ velocidad máxima de la red. Nunca sobreestima → **admisible y consistente**, por lo que A* devuelve la ruta óptima (se verifica en las pruebas contra Costo Uniforme).
+- **Heurística h(n):** distancia en línea recta (haversine) al destino ÷ velocidad máxima de la red. Con tiempos de viaje positivos y penalización de transbordo no negativa, esta cota es **admisible y consistente**. En las pruebas del modelo se contrasta el costo de A* con Costo Uniforme.
 
-## Trabajo en equipo con Git
+## Resultados comprobados
 
-Cada integrante debe hacer sus propios commits con su usuario para que el `git log` muestre su aporte:
+Los tiempos corresponden al modelo académico, no a una predicción del servicio real.
+
+| Caso | Resultado |
+|---|---|
+| La Estrella → Arví | 70 min: 60 de viaje + 2 transbordos de 5 min |
+| Parque Berrío → La Estrella, A* | 23 min; 17 estados expandidos |
+| Mismo par, costo uniforme | 23 min; 53 estados expandidos |
+| Mismo par, BFS | 23 min; 65 estaciones expandidas |
+| Mismo par, voraz | 43 min; 12 estados expandidos |
+| Niquía → San Javier | 37 min |
+| Mismo par, San Antonio cerrada | 47 min, vía Hospital y Cisneros |
+| Niquía → Oriente, San Antonio cerrada | Sin ruta disponible |
+
+El PDF incluye las salidas reales y los detalles de las pruebas. La consulta `transbordo(X)` devuelve nueve estaciones en el escenario base.
+
+## Historial y participación
+
+Se conservan los ocho commits originales de Geraldine Ríos correspondientes al desarrollo del sistema. La preparación de la entrega, la actualización del guion, los nombres, las instrucciones, los enlaces y los documentos de pruebas se registra en un commit posterior de Santiago Duque Mora. No se reescribieron autores ni fechas del historial recibido.
 
 ```bash
-git config user.name "Nombre Apellido"
-git config user.email "correo@ejemplo.com"
-git add <archivos>
-git commit -m "Descripción del cambio"
-git push
+git log --format="%h %an - %s"
 ```
 
-Recuerde agregar al tutor como colaborador del repositorio (GitHub: *Settings → Collaborators*).
+## Pendientes para cerrar la entrega del campus
+
+1. Incorporar el enlace de YouTube que aportará Santiago al README y al PDF de entrega.
+2. Agregar a Sandra Bautista como colaboradora cuando se conozca su usuario de GitHub. El repositorio público permite consultarlo, pero no sustituye ese requisito de la actividad.
+
+El envío del PDF al campus corresponde a la entrega académica y no se realiza desde este repositorio.

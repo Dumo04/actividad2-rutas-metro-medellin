@@ -3,11 +3,13 @@
 Genera los documentos PDF de la entrega a partir de ejecuciones REALES del sistema:
 
   docs/Pruebas_Sistema_Rutas.pdf  -> documento con las pruebas realizadas
-  docs/Entrega_Actividad3.pdf     -> documento con los enlaces (repositorio y video)
+  docs/Entrega_Actividad2.pdf     -> documento con los enlaces (repositorio y video)
 
 Uso:
-  python generar_pdfs.py --repo https://github.com/USUARIO/REPO --video https://youtu.be/XXXX \
-      --integrantes "Nombre 1" "Nombre 2" "Nombre 3"
+  python generar_pdfs.py
+
+Los enlaces e integrantes predeterminados corresponden a la entrega de Actividad 2.
+Se pueden cambiar mediante --repo, --video y --integrantes.
 
 Requiere: pip install reportlab matplotlib
 """
@@ -42,7 +44,8 @@ base = getSampleStyleSheet()
 H1 = ParagraphStyle("H1", parent=base["Heading1"], fontSize=16, spaceAfter=8, textColor=colors.HexColor("#8a1c1c"))
 H2 = ParagraphStyle("H2", parent=base["Heading2"], fontSize=12.5, spaceBefore=10, spaceAfter=5)
 TXT = ParagraphStyle("TXT", parent=base["BodyText"], fontSize=10, leading=14)
-PEQ = ParagraphStyle("PEQ", parent=TXT, fontSize=8.5, leading=11)
+PEQ = ParagraphStyle("PEQ", parent=TXT, fontSize=8, leading=10)
+CAB = ParagraphStyle("CAB", parent=PEQ, textColor=colors.white, fontName="Helvetica-Bold")
 CEN = ParagraphStyle("CEN", parent=TXT, alignment=TA_CENTER)
 TIT = ParagraphStyle("TIT", parent=H1, fontSize=22, alignment=TA_CENTER, leading=28)
 CODE = ParagraphStyle("CODE", fontName="Courier", fontSize=7.3, leading=9,
@@ -50,10 +53,18 @@ CODE = ParagraphStyle("CODE", fontName="Courier", fontSize=7.3, leading=9,
                       borderColor=colors.HexColor("#dddddd"), borderWidth=0.5)
 
 
+def enlace(valor):
+    from xml.sax.saxutils import escape
+    v = escape(valor, {chr(39): "&apos;"})
+    return f"<link href='{v}'>{v}</link>" if valor.startswith("https://") else v
+
+
 def tabla(filas, anchos, cabecera=True):
-    t = Table([[Paragraph(str(c), PEQ) for c in f] for f in filas], colWidths=anchos, repeatRows=1)
+    t = Table([[Paragraph(str(c), CAB if i == 0 and cabecera else PEQ) for c in f] for i, f in enumerate(filas)], colWidths=anchos, repeatRows=1)
     estilo = [("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#bbbbbb")),
-              ("VALIGN", (0, 0), (-1, -1), "TOP")]
+              ("VALIGN", (0, 0), (-1, -1), "TOP"),
+              ("TOPPADDING", (0, 0), (-1, -1), 2),
+              ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]
     if cabecera:
         estilo += [("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#8a1c1c")),
                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white)]
@@ -87,7 +98,7 @@ def pie(canvas, doc):
     canvas.saveState()
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(colors.grey)
-    canvas.drawString(2 * cm, 1.2 * cm, "Inteligencia Artificial - Actividad 3: Sistema basado en conocimiento")
+    canvas.drawString(2 * cm, 1.2 * cm, "Actividad 2 - Búsqueda y sistemas basados en reglas")
     canvas.drawRightString(letter[0] - 2 * cm, 1.2 * cm, f"Página {doc.page}")
     canvas.restoreState()
 
@@ -99,6 +110,7 @@ def portada(titulo, subtitulo, integrantes, extra=()):
     h += [Paragraph(n, CEN) for n in integrantes]
     h += [Spacer(1, 1 * cm)] + [Paragraph(e, CEN) for e in extra]
     h += [Spacer(1, 1 * cm),
+          Paragraph("Docente: Sandra Bautista", CEN),
           Paragraph("Corporación Universitaria Iberoamericana<br/>Ingeniería de Software - Inteligencia Artificial", CEN),
           Paragraph(dt.date.today().strftime("%d/%m/%Y"), CEN), PageBreak()]
     return h
@@ -116,7 +128,7 @@ def informe_pruebas(integrantes, repo, video):
     s = SistemaRutas()
     kb = s.kb
     h = portada("Sistema inteligente de rutas<br/>Metro de Medellín",
-                "Documento de pruebas - Búsqueda heurística (A*) sobre una base de conocimiento en reglas lógicas",
+                "Actividad 2 - Búsqueda y sistemas basados en reglas<br/>Documento de pruebas",
                 integrantes, [f"Repositorio: {repo}", f"Video: {video}"])
 
     # 1. Descripción
@@ -140,13 +152,14 @@ def informe_pruebas(integrantes, repo, video):
     ], [6 * cm, 10.5 * cm]))
 
     h += [Paragraph("1.1 Reglas de la base de conocimiento", H2)]
-    h.append(Preformatted("\n".join(str(r) for r in kb.reglas), CODE))
+    h.append(Preformatted(envolver("\n".join(str(r) for r in kb.reglas)), CODE))
     h += [Spacer(1, 6), Paragraph(
         "<b>Estado</b> = (estación, línea actual). <b>Costo</b> = minutos del tramo + penalización "
         "si se cambia de línea. <b>Heurística</b> h(n) = distancia en línea recta (fórmula de "
         "haversine) hasta el destino ÷ velocidad máxima observada en la red "
         f"({s.buscador.vmax * 60:.1f} km/h). Como ningún tramo supera esa velocidad, h(n) nunca "
-        "sobreestima el costo real: es <b>admisible y consistente</b>, y A* garantiza la ruta óptima.", TXT)]
+        "sobreestima el costo restante bajo los costos positivos y la penalización no negativa de este modelo. "
+        "La comprobación se limita a los escenarios evaluados; no valida parámetros arbitrarios.", TXT)]
     h.append(PageBreak())
 
     # 2. Casos de prueba
@@ -227,7 +240,7 @@ def informe_pruebas(integrantes, repo, video):
     # 4. Comparación de algoritmos
     h += [PageBreak(), Paragraph("4. Comparación de estrategias de búsqueda", H1), Paragraph(
         "Se ejecutaron los cuatro algoritmos sobre los mismos pares origen-destino. <b>A*</b> y "
-        "<b>Costo uniforme</b> siempre encuentran el menor tiempo, pero A* expande menos nodos gracias a "
+        "<b>Costo uniforme</b> obtienen el mismo menor tiempo en los pares evaluados. A* utiliza "
         "la heurística. <b>Amplitud (BFS)</b> minimiza el número de paradas, no el tiempo, y "
         "<b>Voraz</b> es rápido pero no garantiza la ruta óptima.", TXT), Spacer(1, 6)]
     pares = [("La Estrella", "Arví"), ("Niquía", "San Javier"), ("El Progreso", "Villa Sierra"),
@@ -251,7 +264,7 @@ def informe_pruebas(integrantes, repo, video):
 
     # 5. Pruebas unitarias
     res, texto = correr_unittest()
-    h += [PageBreak(), Paragraph("5. Pruebas unitarias automatizadas", H1), Paragraph(
+    h += [Spacer(1, 16), Paragraph("5. Pruebas unitarias automatizadas", H1), Paragraph(
         f"Comando: <font face='Courier'>python -m unittest discover -s tests -v</font>. "
         f"Resultado: <b>{res.testsRun} pruebas ejecutadas, {len(res.failures)} fallos, "
         f"{len(res.errors)} errores.</b>", TXT), Spacer(1, 4), Preformatted(envolver(texto.strip()), CODE)]
@@ -263,7 +276,7 @@ def informe_pruebas(integrantes, repo, video):
         "cerrar estaciones sin reprogramar: el motor de inferencia deduce de nuevo los movimientos válidos.",
         "Las reglas recursivas (alcanzable) y con negación (disponible) muestran cómo un sistema basado "
         "en reglas puede razonar sobre conectividad y restricciones antes de ejecutar la búsqueda.",
-        "A* con una heurística admisible obtuvo siempre la misma ruta óptima que Costo Uniforme, "
+        "En los siete pares evaluados, A* obtuvo el mismo costo óptimo que Costo Uniforme, "
         "expandiendo igual o menos nodos.",
         "BFS y la búsqueda voraz son útiles como comparación: la primera minimiza paradas y la "
         "segunda es rápida, pero ninguna garantiza el menor tiempo total.",
@@ -281,35 +294,40 @@ def informe_pruebas(integrantes, repo, video):
 
 
 def documento_entrega(integrantes, repo, video):
-    h = portada("Actividad 3<br/>Sistema inteligente basado en conocimiento",
+    h = portada("Actividad 2<br/>Búsqueda y sistemas basados en reglas",
                 "Mejor ruta entre dos estaciones del sistema de transporte masivo (Metro de Medellín)",
                 integrantes)
     h += [Paragraph("Enlaces de la entrega", H1), tabla([
         ["Elemento", "Enlace"],
-        ["Repositorio Git (código fuente, instrucciones y PDF de pruebas)", f"<link href='{repo}'>{repo}</link>"],
-        ["Documento de pruebas", f"{repo.rstrip('/')}/blob/main/docs/Pruebas_Sistema_Rutas.pdf"],
-        ["Video explicativo (máx. 10 min)", f"<link href='{video}'>{video}</link>"],
+        ["Repositorio Git (código fuente, instrucciones y PDF de pruebas)", enlace(repo)],
+        ["Documento de pruebas", enlace(repo.rstrip('/') + "/blob/main/docs/Pruebas_Sistema_Rutas.pdf")],
+        ["Video explicativo (máx. 10 min)", enlace(video)],
     ], [7 * cm, 9.5 * cm]), Spacer(1, 12),
         Paragraph("Instrucciones de ejecución", H2),
-        Preformatted("git clone " + repo + "\ncd <carpeta del repositorio>\n"
+        Preformatted("Desde la carpeta del proyecto:\n"
                      "python main.py --origen \"La Estrella\" --destino \"Arví\" --comparar\n"
                      "python -m unittest discover -s tests -v", CODE),
         Spacer(1, 10), Paragraph(
-            "El tutor fue agregado como colaborador del repositorio. El historial de commits (git log) "
-            "evidencia el aporte de cada integrante.", TXT)]
-    ruta = os.path.join(DOCS, "Entrega_Actividad3.pdf")
+            "El repositorio es público e incluye el código y los documentos académicos. "
+            "Santiago publicará el video final de 8 minutos y 4 segundos en YouTube; su enlace se incorporará "
+            "cuando esté disponible. El historial original de Geraldine Ríos se conserva; "
+            "la preparación de documentación y entrega se registra por separado. "
+            "La invitación formal a Sandra Bautista como colaboradora sigue pendiente: no se dispone de su "
+            "usuario de GitHub. La visibilidad pública permite consultar los archivos por enlace, pero no "
+            "equivale a una invitación como colaboradora.", TXT)]
+    ruta = os.path.join(DOCS, "Entrega_Actividad2.pdf")
     SimpleDocTemplate(ruta, pagesize=letter, leftMargin=2 * cm, rightMargin=2 * cm,
-                      topMargin=2 * cm, bottomMargin=2 * cm, title="Entrega Actividad 3").build(
+                      topMargin=2 * cm, bottomMargin=2 * cm, title="Entrega Actividad 2").build(
         h, onFirstPage=pie, onLaterPages=pie)
     return ruta
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--repo", default="[PEGAR ENLACE DEL REPOSITORIO]")
-    p.add_argument("--video", default="[PEGAR ENLACE DEL VIDEO]")
+    p.add_argument("--repo", default="https://github.com/Dumo04/actividad2-rutas-metro-medellin")
+    p.add_argument("--video", default="Pendiente: Santiago publicará el video en YouTube y aportará el enlace")
     p.add_argument("--integrantes", nargs="+",
-                   default=["Geraldine Ríos", "[Integrante 2]", "[Integrante 3]", "[Integrante 4]"])
+                   default=["Santiago Duque Mora", "Geraldine Ríos"])
     a = p.parse_args()
     os.makedirs(DOCS, exist_ok=True)
     ruta, aprob, total, res = informe_pruebas(a.integrantes, a.repo, a.video)

@@ -25,9 +25,11 @@ import unittest
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (Image, KeepTogether, PageBreak, Paragraph, Preformatted, SimpleDocTemplate,
                                 Spacer, Table, TableStyle)
 
@@ -38,36 +40,65 @@ from motor.mapa import dibujar  # noqa: E402
 from motor.sistema import EstacionNoEncontrada, SistemaRutas  # noqa: E402
 
 DOCS = os.path.join(RAIZ, "docs")
+MARGEN = 2.54 * cm
+ANCHO_UTIL = A4[0] - 2 * MARGEN - 12
+
+
+def fuente_academica():
+    """Usa Times New Roman instalada; Times estándar permite generar en otros sistemas."""
+    directorio = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts")
+    archivos = {"Academica": "times.ttf", "Academica-Bold": "timesbd.ttf",
+                "Academica-Italic": "timesi.ttf", "Academica-BoldItalic": "timesbi.ttf"}
+    if all(os.path.isfile(os.path.join(directorio, a)) for a in archivos.values()):
+        for nombre, archivo in archivos.items():
+            pdfmetrics.registerFont(TTFont(nombre, os.path.join(directorio, archivo)))
+        pdfmetrics.registerFontFamily("Academica", normal="Academica", bold="Academica-Bold",
+                                      italic="Academica-Italic", boldItalic="Academica-BoldItalic")
+        return "Academica", "Academica-Bold"
+    return "Times-Roman", "Times-Bold"
+
+
+FUENTE, NEGRITA = fuente_academica()
 
 # ---------------------------------------------------------------- estilos
 base = getSampleStyleSheet()
-H1 = ParagraphStyle("H1", parent=base["Heading1"], fontSize=16, spaceAfter=8, textColor=colors.HexColor("#8a1c1c"))
-H2 = ParagraphStyle("H2", parent=base["Heading2"], fontSize=12.5, spaceBefore=10, spaceAfter=5)
-TXT = ParagraphStyle("TXT", parent=base["BodyText"], fontSize=10, leading=14)
-PEQ = ParagraphStyle("PEQ", parent=TXT, fontSize=8, leading=10)
-CAB = ParagraphStyle("CAB", parent=PEQ, textColor=colors.white, fontName="Helvetica-Bold")
-CEN = ParagraphStyle("CEN", parent=TXT, alignment=TA_CENTER)
-TIT = ParagraphStyle("TIT", parent=H1, fontSize=22, alignment=TA_CENTER, leading=28)
-CODE = ParagraphStyle("CODE", fontName="Courier", fontSize=7.3, leading=9,
-                      backColor=colors.HexColor("#f4f4f4"), borderPadding=5,
-                      borderColor=colors.HexColor("#dddddd"), borderWidth=0.5)
+H1 = ParagraphStyle("H1", parent=base["Heading1"], fontName=NEGRITA, fontSize=12,
+                    leading=13.9, alignment=TA_CENTER, spaceBefore=12, spaceAfter=12,
+                    textColor=colors.black)
+H2 = ParagraphStyle("H2", parent=H1)
+TXT = ParagraphStyle("TXT", parent=base["BodyText"], fontName=FUENTE, fontSize=12,
+                     leading=13.9, firstLineIndent=1.25 * cm, spaceBefore=0, spaceAfter=8,
+                     textColor=colors.black)
+PEQ = ParagraphStyle("PEQ", parent=TXT, fontSize=10, leading=11.6,
+                     firstLineIndent=0, spaceAfter=0)
+CAB = ParagraphStyle("CAB", parent=PEQ, fontName=NEGRITA)
+CEN = ParagraphStyle("CEN", parent=TXT, alignment=TA_CENTER, firstLineIndent=0)
+TIT = ParagraphStyle("TIT", parent=CEN, fontName=NEGRITA)
+CODE = ParagraphStyle("CODE", fontName="Courier", fontSize=8, leading=9.7,
+                      spaceBefore=4, spaceAfter=8)
 
 
 def enlace(valor):
     from xml.sax.saxutils import escape
     v = escape(valor, {chr(39): "&apos;"})
-    return f"<link href='{v}'>{v}</link>" if valor.startswith("https://") else v
+    if not valor.startswith("https://"):
+        return v
+    visible = v.replace("https://github.com/", "https://github.com/<br/>")
+    visible = visible.replace("/blob/main/", "/<br/>blob/main/")
+    return f"<link href='{v}'>{visible}</link>"
 
 
 def tabla(filas, anchos, cabecera=True):
+    total = sum(anchos)
+    anchos = [a * min(1, ANCHO_UTIL / total) for a in anchos]
     t = Table([[Paragraph(str(c), CAB if i == 0 and cabecera else PEQ) for c in f] for i, f in enumerate(filas)], colWidths=anchos, repeatRows=1)
     estilo = [("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#bbbbbb")),
               ("VALIGN", (0, 0), (-1, -1), "TOP"),
               ("TOPPADDING", (0, 0), (-1, -1), 2),
               ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]
     if cabecera:
-        estilo += [("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#8a1c1c")),
-                   ("TEXTCOLOR", (0, 0), (-1, 0), colors.white)]
+        estilo += [("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eeeeee")),
+                   ("TEXTCOLOR", (0, 0), (-1, 0), colors.black)]
     t.setStyle(TableStyle(estilo))
     return t
 
@@ -85,7 +116,7 @@ def consola(cmd_args):
     return Preformatted(envolver(texto), CODE)
 
 
-def envolver(texto, ancho=108):
+def envolver(texto, ancho=90):
     import textwrap
     lineas = []
     for l in texto.splitlines():
@@ -96,23 +127,33 @@ def envolver(texto, ancho=108):
 
 def pie(canvas, doc):
     canvas.saveState()
-    canvas.setFont("Helvetica", 8)
-    canvas.setFillColor(colors.grey)
-    canvas.drawString(2 * cm, 1.2 * cm, "Actividad 2 - Búsqueda y sistemas basados en reglas")
-    canvas.drawRightString(letter[0] - 2 * cm, 1.2 * cm, f"Página {doc.page}")
+    canvas.setFont(FUENTE, 12)
+    canvas.setFillColor(colors.black)
+    canvas.drawRightString(A4[0] - MARGEN, A4[1] - 1.27 * cm, str(doc.page))
     canvas.restoreState()
 
 
 def portada(titulo, subtitulo, integrantes, extra=()):
-    h = [Spacer(1, 3 * cm), Paragraph(titulo, TIT), Spacer(1, 0.4 * cm),
-         Paragraph(subtitulo, CEN), Spacer(1, 1.5 * cm),
-         Paragraph("<b>Integrantes</b>", CEN)]
-    h += [Paragraph(n, CEN) for n in integrantes]
-    h += [Spacer(1, 1 * cm)] + [Paragraph(e, CEN) for e in extra]
-    h += [Spacer(1, 1 * cm),
-          Paragraph("Docente: Sandra Bautista", CEN),
-          Paragraph("Corporación Universitaria Iberoamericana<br/>Ingeniería de Software - Inteligencia Artificial", CEN),
-          Paragraph(dt.date.today().strftime("%d/%m/%Y"), CEN), PageBreak()]
+    tipo = "Documento de pruebas" if extra else "Documento de entrega"
+    h = [Paragraph("CORPORACIÓN UNIVERSITARIA IBEROAMERICANA", TIT),
+         Paragraph("INTELIGENCIA ARTIFICIAL", TIT),
+         Paragraph("Actividad 2<br/>Búsqueda y sistemas basados en reglas<br/>" + tipo, TIT),
+         Spacer(1, 2.25 * cm), Paragraph("Trabajo de:", TIT)]
+    h += [Paragraph(n.upper(), TIT) for n in integrantes]
+    h += [Spacer(1, 5.15 * cm), Paragraph("Docente:", TIT),
+          Paragraph("SANDRA BAUTISTA", TIT), Spacer(1, 5.0 * cm),
+          Paragraph("Fecha de entrega:", TIT)]
+    fecha = dt.date.today()
+    dias = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+    meses = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+             "septiembre", "octubre", "noviembre", "diciembre")
+    h += [Paragraph(f"{dias[fecha.weekday()]}, {fecha.day} de {meses[fecha.month - 1]} de {fecha.year}", TIT), PageBreak()]
+    if extra:
+        h.append(Paragraph("Enlaces del proyecto", H2))
+        for e in extra:
+            etiqueta, valor = e.split(": ", 1)
+            h.append(Paragraph(etiqueta + ": " + enlace(valor), PEQ))
+        h.append(Spacer(1, 12))
     return h
 
 
@@ -215,7 +256,7 @@ def informe_pruebas(integrantes, repo, video):
          f"{s.nombre(r10.estaciones[0])} -> {s.nombre(r10.estaciones[-1])}", r10.encontrada)
 
     h.append(tabla([["ID", "Caso", "Resultado esperado", "Resultado obtenido", "Estado"]] + casos,
-                   [1 * cm, 4.1 * cm, 4.1 * cm, 5 * cm, 2.4 * cm]))
+                   [1.2 * cm, 3.9 * cm, 4.1 * cm, 4.6 * cm, 3 * cm]))
     aprob = sum(1 for c in casos if c[-1] == "APROBADA")
     h += [Spacer(1, 6), Paragraph(f"<b>{aprob} de {len(casos)} casos aprobados.</b>", TXT)]
 
@@ -256,7 +297,10 @@ def informe_pruebas(integrantes, repo, video):
             resumen[r.algoritmo][0] += r.nodos_expandidos
             resumen[r.algoritmo][1] += 1 if abs(r.costo - optimo) < 1e-9 else 0
             resumen[r.algoritmo][2] += r.costo
-    h.append(tabla(filas, [4.6 * cm, 3.2 * cm, 2.2 * cm, 1.8 * cm, 1.6 * cm, 3 * cm]))
+    comparacion = tabla(filas, [4.6 * cm, 3.2 * cm, 2.2 * cm, 1.8 * cm, 1.9 * cm, 3 * cm])
+    comparacion.setStyle(TableStyle([("NOSPLIT", (0, i), (-1, i + 3))
+                                    for i in range(1, len(filas), 4)]))
+    h.append(comparacion)
     h += [KeepTogether([Paragraph("Resumen", H2), tabla(
         [["Algoritmo", "Nodos expandidos (total)", "Rutas óptimas", "Tiempo total (min)"]] +
         [[a, v[0], f"{v[1]} de {len(pares)}", f"{v[2]:g}"] for a, v in resumen.items()],
@@ -286,8 +330,8 @@ def informe_pruebas(integrantes, repo, video):
         h.append(Paragraph("• " + c, TXT))
 
     ruta = os.path.join(DOCS, "Pruebas_Sistema_Rutas.pdf")
-    SimpleDocTemplate(ruta, pagesize=letter, leftMargin=2 * cm, rightMargin=2 * cm,
-                      topMargin=2 * cm, bottomMargin=2 * cm,
+    SimpleDocTemplate(ruta, pagesize=A4, leftMargin=MARGEN, rightMargin=MARGEN,
+                      topMargin=MARGEN, bottomMargin=MARGEN,
                       title="Pruebas - Sistema inteligente de rutas Metro de Medellín").build(
         h, onFirstPage=pie, onLaterPages=pie)
     return ruta, aprob, len(casos), res
@@ -316,8 +360,8 @@ def documento_entrega(integrantes, repo, video):
             "usuario de GitHub. La visibilidad pública permite consultar los archivos por enlace, pero no "
             "equivale a una invitación como colaboradora.", TXT)]
     ruta = os.path.join(DOCS, "Entrega_Actividad2.pdf")
-    SimpleDocTemplate(ruta, pagesize=letter, leftMargin=2 * cm, rightMargin=2 * cm,
-                      topMargin=2 * cm, bottomMargin=2 * cm, title="Entrega Actividad 2").build(
+    SimpleDocTemplate(ruta, pagesize=A4, leftMargin=MARGEN, rightMargin=MARGEN,
+                      topMargin=MARGEN, bottomMargin=MARGEN, title="Entrega Actividad 2").build(
         h, onFirstPage=pie, onLaterPages=pie)
     return ruta
 

@@ -1,6 +1,6 @@
 # Estado de entrega - Actividad 2
 
-Santiago Duque Mora y Geraldine Ríos · Docente: Sandra Bautista
+Santiago Duque Mora y Geraldine Ríos · Docente: Sandra Isabel Rodriguez Bautista
 
 Requisitos contrastados con la actividad del campus el 27/09/2026.
 
@@ -12,7 +12,7 @@ Requisitos contrastados con la actividad del campus el 27/09/2026.
 | Historial Git de los integrantes | Ocho commits originales de Geraldine conservados y preparación de la entrega registrada por Santiago |
 | Video de máximo 10 minutos | [Video en YouTube](https://www.youtube.com/watch?v=CBGlb2Fn-Ms), montaje final de 8:04 |
 | PDF con enlaces | `Entrega_Actividad2.pdf`: enlaces al repositorio, al PDF de pruebas y al video incorporados |
-| Tutor como colaborador | Pendiente: no se dispone del usuario de Sandra Bautista |
+| Tutor como colaborador | Pendiente: no se dispone del usuario de Sandra Isabel Rodriguez Bautista |
 
 Repositorio: https://github.com/Dumo04/actividad2-rutas-metro-medellin
 

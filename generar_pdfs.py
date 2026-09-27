@@ -141,7 +141,7 @@ def portada(titulo, subtitulo, integrantes, extra=()):
          Spacer(1, 2.25 * cm), Paragraph("Trabajo de:", TIT)]
     h += [Paragraph(n.upper(), TIT) for n in integrantes]
     h += [Spacer(1, 5.15 * cm), Paragraph("Docente:", TIT),
-          Paragraph("SANDRA BAUTISTA", TIT), Spacer(1, 5.0 * cm),
+          Paragraph("SANDRA ISABEL RODRIGUEZ BAUTISTA", TIT), Spacer(1, 5.0 * cm),
           Paragraph("Fecha de entrega:", TIT)]
     fecha = dt.date.today()
     dias = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
@@ -356,7 +356,7 @@ def documento_entrega(integrantes, repo, video):
             "El video final de 8 minutos y 4 segundos está disponible en YouTube mediante el enlace de esta tabla. "
             "El historial original de Geraldine Ríos se conserva; "
             "la preparación de documentación y entrega se registra por separado. "
-            "La invitación formal a Sandra Bautista como colaboradora sigue pendiente: no se dispone de su "
+            "La invitación formal a Sandra Isabel Rodriguez Bautista como colaboradora sigue pendiente: no se dispone de su "
             "usuario de GitHub. La visibilidad pública permite consultar los archivos por enlace, pero no "
             "equivale a una invitación como colaboradora.", TXT)]
     ruta = os.path.join(DOCS, "Entrega_Actividad2.pdf")

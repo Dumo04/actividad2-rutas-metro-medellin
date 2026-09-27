@@ -12,7 +12,7 @@ Sistema basado en conocimiento que encuentra la **mejor ruta** entre dos estacio
 
 **Integrantes:** Santiago Duque Mora y Geraldine Ríos.
 
-**Docente:** Sandra Bautista.
+**Docente:** Sandra Isabel Rodriguez Bautista.
 
 ## Entrega académica
 
@@ -168,6 +168,6 @@ git log --format="%h %an - %s"
 
 ## Pendientes para cerrar la entrega del campus
 
-Agregar a Sandra Bautista como colaboradora cuando se conozca su usuario de GitHub. El repositorio público permite consultarlo, pero no sustituye ese requisito de la actividad.
+Agregar a Sandra Isabel Rodriguez Bautista como colaboradora cuando se conozca su usuario de GitHub. El repositorio público permite consultarlo, pero no sustituye ese requisito de la actividad.
 
 El envío del PDF al campus corresponde a la entrega académica y no se realiza desde este repositorio.
